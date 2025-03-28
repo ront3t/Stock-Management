@@ -1,35 +1,38 @@
-// apps/frontend/src/App.tsx
 import React from 'react';
-import { BrowserRouter, Route, Routes, Navigate} from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from 'antd';
-//import Sidebar from './components/Sidebar';
-// import LoginPage from './components/LoginPage';
+import Sidebar from './components/SideBar';
+import LoginPage from './components/LoginPage';
+// // import PortfolioPage from './components/PortfolioPage';
 // import StockDetailsPage from './components/StockDetailsPage';
-import { PortfolioPage } from './components/PortfolioPage';
 import { observer } from 'mobx-react-lite';
 import { authStore } from './stores/AuthStore';
-import LoginPage from './components/LoginPage';
 
 const { Content } = Layout;
 
 const App: React.FC = observer(() => {
-
   return (
-    <div>
-      <Layout style={{ minHeight: '100vh' }}>
-        {/* {authStore.isAuthenticated && <Sidebar />} */}
-        <Layout>
-        <Content style={{ margin: '24px 16px 0' }}>
-           <BrowserRouter>
+    <BrowserRouter>
+      {!authStore.isAuthenticated ? (
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      ) : (
+        <Layout style={{ minHeight: '100vh' }}>
+          <Sidebar />
+          <Layout>
+            <Content style={{ margin: '24px 16px 0' }}>
               <Routes>
-                    <Route path ='/' element={ authStore.isAuthenticated? <PortfolioPage />: <Navigate to='/login'/>} />
-                    <Route path ='/login' element={ !authStore.isAuthenticated? <LoginPage />: <Navigate to='/'/>}/>
+                {/* <Route path="/portfolio" element={<PortfolioPage />} />
+                <Route path="/stocks/:ticker" element={<StockDetailsPage />} /> */}
+                <Route path="*" element={<Navigate to="/portfolio" replace />} />
               </Routes>
-           </BrowserRouter>
-          </Content>
+            </Content>
+          </Layout>
         </Layout>
-      </Layout>
-    </div>
+      )}
+    </BrowserRouter>
   );
 });
 
