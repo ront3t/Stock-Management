@@ -1,35 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// apps/frontend/src/App.tsx
+import React from 'react';
+import { BrowserRouter, Route, Routes, Navigate} from 'react-router-dom';
+import { Layout } from 'antd';
+//import Sidebar from './components/Sidebar';
+// import LoginPage from './components/LoginPage';
+// import StockDetailsPage from './components/StockDetailsPage';
+import { PortfolioPage } from './components/PortfolioPage';
+import { observer } from 'mobx-react-lite';
+import { authStore } from './stores/AuthStore';
+import LoginPage from './components/LoginPage';
 
-function App() {
-  const [count, setCount] = useState(0)
+const { Content } = Layout;
+
+const App: React.FC = observer(() => {
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div>
+      <Layout style={{ minHeight: '100vh' }}>
+        {/* {authStore.isAuthenticated && <Sidebar />} */}
+        <Layout>
+        <Content style={{ margin: '24px 16px 0' }}>
+           <BrowserRouter>
+              <Routes>
+                    <Route path ='/' element={ authStore.isAuthenticated? <PortfolioPage />: <Navigate to='/login'/>} />
+                    <Route path ='/login' element={ !authStore.isAuthenticated? <LoginPage />: <Navigate to='/'/>}/>
+              </Routes>
+           </BrowserRouter>
+          </Content>
+        </Layout>
+      </Layout>
+    </div>
+  );
+});
 
-export default App
+export default App;
