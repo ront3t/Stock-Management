@@ -3,58 +3,119 @@ import { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { portfolioStore } from '../stores/PortfolioStore';
 import { authStore } from '../stores/AuthStore';
-import { Input, Button, List, Row, Col, Typography } from 'antd';
+import { Input, Button, List, Row, Col, Typography, message } from 'antd';
+import API from '../services/api';
 
 const { Title } = Typography;
 
 const PortfolioPage = observer(() => {
-  const [newTicker, setNewTicker] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
 
   useEffect(() => {
-    console.log('')
     portfolioStore.fetchPortfolio();
   }, []);
 
-  const addStock = async () => {
-    if (newTicker.trim()) {
-      await portfolioStore.addStock(newTicker.toUpperCase());
-      setNewTicker('');
+  // Call the backend to search for stocks
+  const handleSearch = async (value: string) => {
+    if (value.trim()) {
+      try {
+        const response = await API.get('/stocks/search', {
+          params: { query: value },
+        });
+        setSearchResults(response.data);
+      } catch (error) {
+        console.error('Error searching stocks', error);
+        message.error('Error searching stocks');
+      }
     }
   };
 
-  const removeStock = async (ticker: string) => {
-    await portfolioStore.removeStock(ticker);
+  const handleAddStock = async (ticker: string) => {
+    try {
+      await portfolioStore.addStock(ticker);
+      message.success(`Stock ${ticker} added to your portfolio`);
+      setSearchResults([]); // Clear search results
+      portfolioStore.fetchPortfolio(); // Refresh portfolio list
+    } catch (error) {
+      console.error('Failed to add stock', error);
+      message.error(`Failed to add stock ${ticker}`);
+    }
+  };
+
+  const handleRemoveStock = async (stockId: string) => {
+    try {
+      await portfolioStore.removeStock(stockId);
+      message.success('Stock removed from your portfolio');
+      portfolioStore.fetchPortfolio();
+    } catch (error) {
+      console.error('Failed to remove stock', error);
+      message.error('Failed to remove stock');
+    }
   };
 
   return (
     <div style={{ padding: '20px' }}>
       {/* Personalized greeting */}
-      <Title level={3}>Hey {authStore.username || 'User'}, your stock portfolio:</Title>
-      
+      <Title level={3}>
+        Hey {authStore.username || 'User'}, your stock portfolio:
+      </Title>
+
       <Row gutter={[16, 16]}>
-        {/* Search input to add new stocks */}
+        {/* Stock Search Input */}
         <Col xs={24} md={12}>
-          <Input.Search 
-            placeholder="Enter stock ticker" 
-            enterButton="Add" 
-            value={newTicker} 
-            onChange={(e) => setNewTicker(e.target.value)} 
-            onSearch={addStock}
+          <Input.Search
+            placeholder="Search for stocks"
+            enterButton="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onSearch={handleSearch}
           />
         </Col>
-        {/* List of user's stocks with remove button */}
-        <Col xs={24} md={12}>
+      </Row>
+
+      {/* Display search results */}
+      {searchResults.length > 0 && (
+        <Row style={{ marginTop: '20px' }}>
+          <Col span={24}>
+            <List
+              header={<div>Search Results</div>}
+              bordered
+              dataSource={searchResults}
+              renderItem={(item: any) => (
+                <List.Item
+                  actions={[
+                    <Button type="primary" onClick={() => handleAddStock(item.symbol)}>
+                      Add
+                    </Button>,
+                  ]}
+                >
+                  <div>
+                    <strong>{item.symbol}</strong> - {item.name}
+                  </div>
+                </List.Item>
+              )}
+            />
+          </Col>
+        </Row>
+      )}
+
+      {/* List of user's portfolio stocks */}
+      <Row gutter={[16, 16]} style={{ marginTop: '20px' }}>
+        <Col xs={24}>
           <List
             header={<div>Your Stocks</div>}
             bordered
             dataSource={portfolioStore.stocks}
-            renderItem={(ticker: string) => (
+            renderItem={(stock: any) => (
               <List.Item
                 actions={[
-                  <Button danger onClick={() => removeStock(ticker)}>Remove</Button>
+                  <Button danger onClick={() => handleRemoveStock(stock.id)}>
+                    Remove
+                  </Button>,
                 ]}
               >
-                {ticker}
+                {stock.ticker}
               </List.Item>
             )}
           />

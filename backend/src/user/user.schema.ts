@@ -1,16 +1,20 @@
-// apps/backend/src/users/schemas/user.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { IsEmail } from 'class-validator';
+import { Base, BaseDocument } from '../common/schemas/base.schema';
 
-export type UserDocument = User & Document;
+export type UserDocument = User & BaseDocument;
 
-@Schema()
-export class User {
-  @Prop({ unique: true })
+@Schema({ timestamps: true })
+export class User extends Base {
+  @Prop({ unique: true, required: true })
   username: string;
 
-  @Prop()
-  password: string; // In production, store hashed passwords
+  @Prop({ unique: true, required: true })
+  @IsEmail()
+  email: string;
+
+  @Prop({ required: true })
+  password: string; // hashed password
 
   @Prop({ default: null })
   refreshToken: string;

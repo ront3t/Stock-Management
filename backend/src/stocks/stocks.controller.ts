@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Delete, Param, Body, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, UseGuards, Request, HttpCode, HttpStatus, Query, UseFilters } from '@nestjs/common';
 import { StocksService } from './stocks.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { StockExceptionsFilter } from './filters/stock-exceptions.filters';
 
 @Controller('stocks')
 @UseGuards(JwtAuthGuard)
+@UseFilters(StockExceptionsFilter)
 export class StocksController {
   constructor(private readonly stocksService: StocksService) {}
 
@@ -23,8 +25,13 @@ export class StocksController {
     return this.stocksService.removeStock(req.user.userId, id);
   }
 
-  @Get(':ticker')
+  @Get('tickers/:ticker')
   async getStockQuote(@Param('ticker') ticker: string): Promise<any> {
     return this.stocksService.getStockQuote(ticker.toUpperCase());
+  }
+
+  @Get('search')
+  async searchTickers(@Query('query') query: string) {
+    return this.stocksService.searchTickers(query);
   }
 }

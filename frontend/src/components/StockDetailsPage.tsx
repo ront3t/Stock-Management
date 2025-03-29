@@ -23,8 +23,9 @@ const StockDetailsPage = () => {
         setStock(response.data);
       } catch (error) {
         console.error('Error fetching stock details', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchStock();
