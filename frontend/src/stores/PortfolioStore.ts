@@ -13,7 +13,7 @@ class PortfolioStore {
 
   async fetchPortfolio() {
     try {
-      const response = await API.get('/portfolio');
+      const response = await API.get('/stocks/portfolio');
       runInAction(() => {
         this.stocks = response.data.stocks;
       });
@@ -24,7 +24,7 @@ class PortfolioStore {
 
   async addStock(ticker: string) {
     try {
-      const response = await API.post('/portfolio/add', { ticker });
+      const response = await API.post('/stocks/portfolio/add', { ticker });
       runInAction(() => {
         this.stocks = response.data.stocks;
       });
@@ -35,7 +35,7 @@ class PortfolioStore {
 
   async removeStock(ticker: string) {
     try {
-      const response = await API.delete(`/portfolio/remove/${ticker}`);
+      const response = await API.delete(`/stocks/portfolio/remove/${ticker}`);
       runInAction(() => {
         this.stocks = response.data.stocks;
       });
@@ -46,7 +46,7 @@ class PortfolioStore {
 
   async fetchAnalytics() {
     try {
-      const response = await API.get('/portfolio/analytics');
+      const response = await API.get('/stocks/portfolio/analytics');
       runInAction(() => {
         this.analytics = response.data;
       });

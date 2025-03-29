@@ -1,24 +1,39 @@
-// apps/frontend/src/stores/AuthStore.ts
 import { makeAutoObservable, runInAction } from 'mobx';
 import API from '../services/api';
+import { jwtDecode } from 'jwt-decode';
+
+
+interface JwtPayload {
+  username: string;
+  // include other properties if needed
+}
 
 class AuthStore {
-  accessToken   = '';
-  refreshToken  = '';
+  accessToken = '';
+  refreshToken = '';
   isAuthenticated = false;
+  username = '';
 
   constructor() {
-    makeAutoObservable(this, {}, { autoBind: true });
+    makeAutoObservable(this);
     this.loadTokens();
   }
 
   loadTokens() {
-    const token   = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken');
     const refresh = localStorage.getItem('refreshToken');
     if (token && refresh) {
-      this.accessToken = token;
-      this.refreshToken = refresh;
-      this.isAuthenticated = true;
+      runInAction(() => {
+        this.accessToken = token;
+        this.refreshToken = refresh;
+        this.isAuthenticated = true;
+        try {
+          const decoded = jwtDecode<JwtPayload>(token);
+          this.username = decoded.username;
+        } catch (error) {
+          console.error('Error decoding token', error);
+        }
+      });
     }
   }
 
@@ -26,9 +41,15 @@ class AuthStore {
     try {
       const response = await API.post('/auth/login', { username, password });
       runInAction(() => {
-        this.accessToken = response.data.accessToken;
+        this.accessToken = response.data.access_token;
         this.refreshToken = response.data.refreshToken;
         this.isAuthenticated = true;
+        try {
+          const decoded = jwtDecode<JwtPayload>(response.data.accessToken);
+          this.username = decoded.username;
+        } catch (error) {
+          console.error('Error decoding token', error);
+        }
       });
       localStorage.setItem('accessToken', this.accessToken);
       localStorage.setItem('refreshToken', this.refreshToken);
@@ -48,6 +69,7 @@ class AuthStore {
         this.accessToken = '';
         this.refreshToken = '';
         this.isAuthenticated = false;
+        this.username = '';
       });
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');

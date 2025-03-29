@@ -16,7 +16,10 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
 
   const handleMenuClick = ({ key }: { key: string }) => {
-    if (key === 'logout') {
+    if(key === '/analytics'){
+      window.alert('to be continued...')
+    }
+    else if(key === 'logout') {
       authStore.logout();
       navigate('/login');
     } else {
