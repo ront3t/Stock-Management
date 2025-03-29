@@ -1,5 +1,5 @@
 // apps/frontend/src/stores/AuthStore.ts
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 import API from '../services/api';
 
 class AuthStore {
@@ -8,7 +8,7 @@ class AuthStore {
   isAuthenticated = false;
 
   constructor() {
-    makeAutoObservable(this);
+    makeAutoObservable(this, {}, { autoBind: true });
     this.loadTokens();
   }
 
@@ -25,9 +25,11 @@ class AuthStore {
   async login(username: string, password: string) {
     try {
       const response = await API.post('/auth/login', { username, password });
-      this.accessToken  = response.data.accessToken;
-      this.refreshToken = response.data.refreshToken;
-      this.isAuthenticated = true;
+      runInAction(() => {
+        this.accessToken = response.data.accessToken;
+        this.refreshToken = response.data.refreshToken;
+        this.isAuthenticated = true;
+      });
       localStorage.setItem('accessToken', this.accessToken);
       localStorage.setItem('refreshToken', this.refreshToken);
     } catch (error) {
@@ -36,26 +38,19 @@ class AuthStore {
     }
   }
 
-  logout() {
-    API.post('/auth/logout').then(() => {
-      this.accessToken = '';
-      this.refreshToken = '';
-      this.isAuthenticated = false;
+  async logout() {
+    try {
+      await API.post('/auth/logout');
+    } catch (error) {
+      console.error('Logout endpoint returned error, clearing tokens anyway', error);
+    } finally {
+      runInAction(() => {
+        this.accessToken = '';
+        this.refreshToken = '';
+        this.isAuthenticated = false;
+      });
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
-    });
-  }
-
-  async refreshAccessToken() {
-    try {
-      const response = await API.post('/auth/refresh', { refreshToken: this.refreshToken });
-      this.accessToken  = response.data.accessToken;
-      this.refreshToken = response.data.refreshToken;
-      localStorage.setItem('accessToken', this.accessToken);
-      localStorage.setItem('refreshToken', this.refreshToken);
-    } catch (error) {
-      console.error('Refresh token failed', error);
-      this.logout();
     }
   }
 }
