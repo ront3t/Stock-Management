@@ -24,4 +24,12 @@ export class UsersService {
     });
     return createdUser.save();
   }
+
+  async updateRefreshToken(id: string, refreshToken: string | null): Promise<User | null> {
+    return this.userModel.findByIdAndUpdate(
+      id,
+      { refreshToken },
+      { new: true }
+    );
+  }
 }

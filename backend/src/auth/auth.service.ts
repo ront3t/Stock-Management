@@ -29,4 +29,9 @@ export class AuthService {
   async register(userData: { username: string; email: string; password: string }) {
     return this.usersService.create(userData);
   }
+
+  async logout(user: any) {
+    await this.usersService.updateRefreshToken(user._id, null);
+    return { message: 'Logged out successfully' };
+  }
 }

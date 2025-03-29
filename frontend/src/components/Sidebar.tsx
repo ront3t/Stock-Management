@@ -5,6 +5,12 @@ import { authStore } from '../stores/AuthStore';
 
 const { Sider } = Layout;
 
+const menuItems = [
+  { key: '/portfolio', label: 'Portfolio' },
+  { key: '/analytics', label: 'Analytics' },
+  { key: 'logout', label: 'Logout' },
+];
+
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,11 +26,13 @@ const Sidebar: React.FC = () => {
 
   return (
     <Sider>
-      <Menu theme="dark" mode="inline" selectedKeys={[location.pathname]} onClick={handleMenuClick}>
-        <Menu.Item key="/portfolio">Portfolio</Menu.Item>
-        <Menu.Item key="/analytics">Analytics</Menu.Item>
-        <Menu.Item key="logout">Logout</Menu.Item>
-      </Menu>
+      <Menu
+        theme="dark"
+        mode="inline"
+        selectedKeys={[location.pathname]}
+        items={menuItems}
+        onClick={handleMenuClick}
+      />
     </Sider>
   );
 };
