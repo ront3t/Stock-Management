@@ -7,6 +7,7 @@ import PortfolioPage from './components/PortfolioPage';
 import StockDetailsPage from './components/StockDetailsPage';
 import { observer } from 'mobx-react-lite';
 import { authStore } from './stores/AuthStore';
+import RegisterPage from './components/RegisterPage';
 
 const { Content } = Layout;
 
@@ -15,6 +16,7 @@ const App: React.FC = observer(() => {
     <BrowserRouter>
       {!authStore.isAuthenticated ? (
         <Routes>
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
