@@ -1,8 +1,8 @@
-// apps/frontend/src/components/PortfolioPage.tsx
 import { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { portfolioStore } from '../stores/PortfolioStore';
 import { authStore } from '../stores/AuthStore';
+import { Link } from 'react-router-dom';
 import { Input, Button, List, Row, Col, Typography, message } from 'antd';
 import API from '../services/api';
 
@@ -115,7 +115,7 @@ const PortfolioPage = observer(() => {
                   </Button>,
                 ]}
               >
-                {stock.ticker}
+                <Link to={`/stocks/${stock.ticker}`}>{stock.ticker}</Link>
               </List.Item>
             )}
           />

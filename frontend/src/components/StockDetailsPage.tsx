@@ -19,7 +19,7 @@ const StockDetailsPage = () => {
   useEffect(() => {
     const fetchStock = async () => {
       try {
-        const response = await API.get(`/stocks/${ticker}`);
+        const response = await API.get(`/stocks/tickers/${ticker}`);
         setStock(response.data);
       } catch (error) {
         console.error('Error fetching stock details', error);
