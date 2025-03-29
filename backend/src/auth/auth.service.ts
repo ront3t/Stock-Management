@@ -13,14 +13,17 @@ export class AuthService {
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findByUsername(username);
     if (user && await bcrypt.compare(pass, user.password)) {
-      const { password, ...result } = user;
+      const { password, ...result } = user.toObject();
       return result;
     }
     return null;
   }
 
   async login(user: any): Promise<{ access_token: string }> {
-    const payload = { username: user.username, sub: user._id };
+    const payload = { 
+      userId: user._id.toString(),
+      username: user.username 
+    };
     return {
       access_token: this.jwtService.sign(payload),
     };
@@ -35,3 +38,4 @@ export class AuthService {
     return { message: 'Logged out successfully' };
   }
 }
+

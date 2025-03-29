@@ -3,7 +3,8 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import API from '../services/api';
 
 class PortfolioStore {
-  stocks    = [];
+  // Now, stocks is an array of stock objects: { _id: string, ticker: string, ... }
+  stocks = [];
   analytics = null;
 
   constructor() {
@@ -13,9 +14,11 @@ class PortfolioStore {
 
   async fetchPortfolio() {
     try {
-      const response = await API.get('/portfolio');
+      // Updated endpoint to use '/stocks/portfolio'
+      const response = await API.get('/stocks/portfolio');
       runInAction(() => {
-        this.stocks = response.data.stocks;
+        // Assume response.data is an array of stock objects
+        this.stocks = response.data;
       });
     } catch (error) {
       console.error('Failed to fetch portfolio', error);
@@ -24,21 +27,21 @@ class PortfolioStore {
 
   async addStock(ticker: string) {
     try {
-      const response = await API.post('/portfolio/add', { ticker });
-      runInAction(() => {
-        this.stocks = response.data.stocks;
-      });
+      // Updated endpoint for adding stock
+      await API.post('/stocks/portfolio', { ticker });
+      // Refresh the portfolio after adding
+      this.fetchPortfolio();
     } catch (error) {
       console.error('Failed to add stock', error);
     }
   }
 
-  async removeStock(ticker: string) {
+  async removeStock(stockId: string) {
     try {
-      const response = await API.delete(`/portfolio/remove/${ticker}`);
-      runInAction(() => {
-        this.stocks = response.data.stocks;
-      });
+      // Updated endpoint to pass stockId instead of ticker
+      await API.delete(`/stocks/portfolio/${stockId}`);
+      // Refresh the portfolio after removal
+      this.fetchPortfolio();
     } catch (error) {
       console.error('Failed to remove stock', error);
     }
@@ -46,7 +49,7 @@ class PortfolioStore {
 
   async fetchAnalytics() {
     try {
-      const response = await API.get('/portfolio/analytics');
+      const response = await API.get('/stocks/portfolio/analytics');
       runInAction(() => {
         this.analytics = response.data;
       });

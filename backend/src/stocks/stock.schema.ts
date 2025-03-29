@@ -1,10 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
+import { Base, BaseDocument } from '../common/schemas/base.schema'
+;
 
-export type StockDocument = Stock & Document;
+export type StockDocument = Stock & BaseDocument;
 
-@Schema()
-export class Stock {
+@Schema({ timestamps: true })
+export class Stock extends Base {
   @Prop({ required: true })
   ticker: string;
 
